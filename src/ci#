@@ -1,0 +1,4 @@
+find . -type d -fprintf aq32 "( cd %p ; ci $* ./# )\n"
+chmod u+x aq32
+./aq32
+rm -f aq32

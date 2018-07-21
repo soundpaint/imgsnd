@@ -1,0 +1,157 @@
+/*
+ * $Source: /home/reuter/archive/project/ImageSound/IS/src/BUGS.rca $
+ * $Revision: 1.3 $
+ * $Aliases: beta2 $
+ * $Author: reuter $
+ * $Date: Tue Jul 21 23:57:34 1998 $
+ * $State: Experimental $
+ */
+
+/*
+ * @(#)BUGS 1.00 98/06/09
+ *
+ * Copyright (C) 1998 Juergen Reuter
+ *
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+Known bugs:
+-----------
+
+* ImageSound, MIDI2PNM: RGB <-> HSB conversion not correctly implemented.
+
+* MIDI2PNM: Options info and noinfo not implemented by now.
+
+* Sam2Any: .wav format: Is number of channels handled correct?
+
+* Sam2Any: .wav format: Currently, only 16 bits linear signed int supported.
+
+* Sam2Any: .au format: Currently, only 8 bits mu-law supported.
+
+Flaws and missing features:
+---------------------------
+
+* ImageSound: Is it possible to significantly enhance the performance
+  of synthesis? Should we use constant tables rather than calling
+  Math.sin(x) again and again? What about images that are almost
+  black? Should we examine the image and deal only with those parts
+  that are not black? But then, the estimated time (ETA) would become
+  quite random. And, as we low-pass pixel brightness over the time
+  axis, there would be no more really black pixels in a line once
+  there has been a non-black pixel. But we may define some epsilon
+  limit of brightness, below that a pixel is regarded black.
+
+* ImageSound: Interpretation of color (see doc/ImageSound.txt: Future work)
+
+* ImageSound: Support of non-sinoide synthesis (see
+  doc/ImageSound.txt: Future work)
+
+* Design a script language that puts all tools (ImageSound, Sam2Any,
+  MIDI2PNM, ...) together into one language
+
+* ImageSound: Instead of specifying minfreq/maxfreq/spctdist, allow to
+  define a table of arbitrary frequencies (at least when using the script
+  language; perhaps even on the command line)
+
+* Support handling of images rotated by 90 degrees in all tools
+
+* PNMReader: Must rework getGrayPixel() to return true brightness
+  (use java's hsb model)
+
+* ImageSound: Use colors to manipulate the phase during synthesis?
+
+* ImageSound: Support stereo sound
+  Two alternatives:
+  Either pass two images onto ImageSound - one for the right channel
+  and one for the left channel.
+  Or use one image as usual, but a second one to specify balance
+  information (e.g. black = left; white = right; gray = inbetween).
+  With using colors, we even could specify the location (degree)
+  of the sound source to handle surround stereo.
+
+* ImageSound: Let the user alternatively specify seconds per line
+  instead of sample length in seconds
+
+* ImageSound: Offer a 'preview' (or rather 'prehear') mode. In this
+  mode, compute all sample values only approximately, but much faster
+  (e.g. skip some spectral lines or approximate some lines by a single
+  line).
+
+* Add some graphical tools. These tools operate on images and return
+  a new image as result. Examples are:
+    ImageAppend(image1, image2, options) appends two images
+
+    ImageShift(image, freq) adds black lines at the bottom or top
+
+    AmpMod(image, lineno, freq) modulates the amplitude of a single
+      spectral line by multiplying all pixels of this line with
+      a (e.g. sine) wave.
+
+    FreqMod(image, x1, y1, x2, y2, freq, amp) applies a vibrato
+      on the specified rectangular area (x1, y1, x2, y2) by shifting
+      all pixels in this area according to the elongation of a (e.g
+      sine) wave of the given frequency and amplitude.
+
+    ImageUnite(image1, image2) creates a new image (image3) from two images
+      by adding color information pixelwise:
+      image3(x,y) := image1(x,y) + image2(x,y) for all color constituents.
+      May need to add special behaviour when image1 and image2 differ
+      in x size or y size (e.g. pre-scale one of the images).
+
+    ImageScale(image, xscale, yscale) scales the x and/or y size of
+      the specified image.
+
+    ImageEcho(image, options)
+    ImageReverb(image, options)
+    ImageChorus(image, options)
+      These apply transformations on the image that, accoustically
+      spoken, are equivalent to echo, reverb and chorus effects,
+      respectively.
+
+  Should we operate on PNM files? Or define a proprietary format,
+  including additional information such as scaling of axes, minFreq,
+  maxFreq, ...
+
+  We may want to introduce some sort of multi-layer images (similar to
+  those used e.g. in CAD systems for printed circuit boards). With
+  multi-layer images, we could e.g. use one layer for the right
+  channel and one for the channel to create stereo sound. Or, instead
+  of using different colors for different waveforms, we may use one
+  layer for each waveform. This approach would also solve the problem
+  of interfering sounds (see doc/ImageSound.txt: Future work).
+
+* All tools should inform the user of the (estimated) size of the file
+  that is going to be created.
+
+* MIDI2PPM: Add ProgressDisplay
+
+* ImageSound: performance of reading image file could be enhanced
+
+* Generalize Sam2Any into Any2Any. To achieve this, define an
+  AudioInputStream class and create subclasses such as
+  SamAudioInpuStream, SunAudioInputStream and WavAudioInputStream
+
+* MIDI2PPM: Add a lot of features, e.g.:
+
+  * Convert only those tracks that the user explicitly selects.
+
+  * To avoid potential collisions in pitch among different tracks,
+    allow to pitch-shift (i.e., effectively, pixel-shift) certain
+    tracks.
+
+  * Define brightness scaling.
+
+  * Translate program change commands into pixel color changes.
+
+-------------------------------------------------------------------------------

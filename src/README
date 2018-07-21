@@ -1,0 +1,83 @@
+$Source: /home/reuter/archive/project/ImageSound/IS/src/README.rca $
+$Revision: 1.1 $
+$Aliases: beta2 $
+$Author: reuter $
+$Date: Sat Jun 27 14:25:38 1998 $
+$State: Experimental $
+
+	ImageSound release 1.0-alpha1
+
+These are the release notes for the ImageSound utility, release
+1.0-alpha1. Read them carefully, as they tell you what this is all
+about, explain how to install the system, and what to do if something
+goes wrong. 
+
+WHAT IS ImageSound?
+
+  ImageSound is a Java(tm)-based utility for converting images into
+  sound. ImageSound supposes that the image is a graphical
+  representation of the sound spectrum over the time.
+  Thus, it converts a discrete series of disctrete spectra into a
+  discrete series of samples. ImageSound stores these samples in a
+  special system independent file format. You can convert the output
+  of ImageSound into a proprietary format using one of the sound
+  file format converting utilities.
+  Currently, the following converters are available:
+
+    SAM2AU (ImageSound Sample File Format to Sun Audio File Format)
+
+  ImageSound is distributed under the GNU General Public License - see the
+  accompanying COPYING file for more details. 
+
+ON WHAT HARDWARE DOES IT RUN?
+
+  ImageSound is fully written in Java; so, virtually, it runs on any
+  platform that a java runtime environment (JRE) is available for.
+  ImageSound requires JRE/JDK1.1.x or higher.
+
+DOCUMENTATION:
+
+  The directory doc contains a collection of various documentation in
+  specific subdirectories.
+
+  - The directory doc/api contains the API documentation in html
+    format as generated from the javadoc utility.
+
+INSTALLING:
+
+  Create a directory as home for the ImageSound system, e.g.:
+
+	mkdir C:\ImageSound			% Windows95/NT(tm)
+
+	mkdir $HOME/ImageSound			% Unix(tm)
+
+  Copy the compressed file ImageSound.tgz or ImageSound.zip into this
+  directory. Go into the directory with the command `cd'. Uncompress
+  the file with
+
+	unzip SysExEdit.zip
+
+  or
+
+	gunzip -c SysExEdit.tgz | tar -xf -
+
+COMPILING:
+
+  With the shell command `cd', go into the directory that contains
+  this README file.
+
+  On Unix systems, type `make all'.
+
+  On Windows95/NT systems, type `make.bat'.
+
+IF SOMETHING GOES WRONG:
+
+  First, check out for the file FAQ in the same directory as this
+  file, if present. If that does not help, email me:
+
+	reuterj@ira.uka.de
+
+  If you find any bugs or would like to send a comment, you can also
+  mail me.
+
+GOOD LUCK AND ENJOY!

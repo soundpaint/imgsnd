@@ -1,0 +1,4 @@
+find . -type d -fprintf aq31 "( cd %p ; co $* ./# )\n"
+chmod u+x aq31
+./aq31
+rm -f aq31

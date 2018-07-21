@@ -1,0 +1,253 @@
+/*
+ * $Source: /home/reuter/archive/project/ImageSound/IS/src/doc/sam-format-description.txt.rca $
+ * $Revision: 1.1 $
+ * $Aliases: beta2 $
+ * $Author: reuter $
+ * $Date: Sat Jun 27 14:27:58 1998 $
+ * $State: Experimental $
+ */
+
+/*
+ * @(#)sam-format-description.txt 1.00 98/02/22
+ *
+ * Copyright (C) 1998 Juergen Reuter
+ *
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+sam-1.0 format description
+==========================
+
+
+Introduction
+------------
+
+ImageSound generates sample data that is stored in files with
+proprietary format and with a name that usually ends with the
+suffix ".sam".
+
+The following text describes the format of this file.
+
+
+SAM Format
+----------
+Each sam file starts with a header chunk of variable length, followed
+by a single chunk of raw sample data.
+
+
+SAM Header Chunk
+----------------
+
+! Offset ! Bytes ! Type           ! Comment                               !
+!--------+-------+----------------+---------------------------------------!
+! 0x00   !     6 !     UTF string ! magic number ".sam"                   !
+! 0x06   !     4 ! unsigned int32 ! total length of header chunk in bytes !
+! 0x0a   !    10 !     UTF string ! version info "00010000"               !
+! 0x14   !     2 ! unsigned int16 ! values per sample (mono=1; stereo=2)  !
+! 0x16   !     2 ! unsigned int16 ! number of channels (usually 1)        !
+! 0x18   !     4 ! unsigned int32 ! sample value encoding type            !
+! 0x1c   !     4 ! unsigned int32 ! sampling rate in Hz                   !
+! 0x20   !     n !     UTF string ! character info                        !
+!--------+-------+----------------+---------------------------------------!
+!        !       !                !                                       !
+
+All number types are "little endian", i.e. the MSB comes first.
+
+Possible values for sampling encoding (offset 0x18) are:
+
+! Value ! Encoding             !
+!-------+----------------------!
+!     1 ! 8 bit mu-law         !
+!     7 ! 64 bit float, linear !
+!-------+----------------------!
+!       !                      !
+
+64 bit float encoding follows IEEE 754 double format.
+
+SAM Data Chunk
+--------------
+
+! Offset ! Bytes ! Type            ! Comment                             !
+!--------+-------+-----------------+-------------------------------------!
+! 0x00   !     6 !      UTF string ! magic number "data"                 !
+! 0x06   !     4 !  unsigned int32 ! total length of data chunk in bytes !
+! 0x0a   !     m ! <depends, s.b.> ! min, max and avg sample data        !
+! 0x0a+m !     n ! <depends, s.b.> ! raw sample data                     !
+!--------!-------!-----------------+-------------------------------------!
+!        !       !                 !                                     !
+
+The type of the min, max, avg and raw sample data depends on the type
+as selected in the sampling encoding field in the header chunk. We
+first describe the format of the raw sample data.
+
+If multiple values per sample or multiple channels are specified in
+the chunk header, the structure of the raw sample data is as follows:
+The sample data is represented as an array of samples. Each sample
+consists of an array of channel samples in ascending order of
+channels. Each channel sample in turn is made up by an array of sample
+values for this channel, again in ascending order. In the case of a
+stereo sample, the 'right' sample is followed by the 'left'
+sample.
+
+The min, max and avg sample data are simply three samples (min first,
+then max, then avg), that are structured just the same way as each
+sample of the raw sample data.
+
+Example Data Chunk
+------------------
+
+E.g. a data chunk of three stereo channels with 32 bit sample values
+may start as follows:
+
+! Offset ! Bytes ! Value           ! Comment                            !
+!--------+-------+-----------------+------------------------------------!
+! 0x0000 !     6 ! UTF("data")     ! magic number "data"                !
+!--------+-------+-----------------+------------------------------------!
+! 0x0006 !     1 ! 0x00            ! 24082 bytes (0x00005e12)           !
+! 0x0007 !     1 ! 0x00            ! in this                            !
+! 0x0008 !     1 ! 0x5d            ! chunk                              !
+! 0x0009 !     1 ! 0xc8            !                                    !
+!--------+-------+-----------------+------------------------------------!
+! 0x000a !     1 ! 0x00            ! min sample, channel 0, right, MSB  !
+! 0x000b !     1 ! 0x61            !                                    !
+! 0x000c !     1 ! 0x2a            !                                    !
+! 0x000d !     1 ! 0x1f            ! min sample, channel 0, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x000e !     1 ! 0x00            ! min sample, channel 0, left, MSB   !
+! 0x000f !     1 ! 0x5d            !                                    !
+! 0x0010 !     1 ! 0x43            !                                    !
+! 0x0011 !     1 ! 0x24            ! min sample, channel 0, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x0012 !     1 ! 0x00            ! min sample, channel 1, right, MSB  !
+! 0x0013 !     1 ! 0x00            !                                    !
+! 0x0014 !     1 ! 0x25            !                                    !
+! 0x0015 !     1 ! 0xcf            ! min sample, channel 1, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x0016 !     1 ! 0x00            ! min sample, channel 1, left, MSB   !
+! 0x0017 !     1 ! 0x17            !                                    !
+! 0x0018 !     1 ! 0x2a            !                                    !
+! 0x0019 !     1 ! 0x67            ! min sample, channel 1, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x001a !     1 ! 0x00            ! min sample, channel 2, right, MSB  !
+! 0x001b !     1 ! 0x00            !                                    !
+! 0x001c !     1 ! 0x6b            !                                    !
+! 0x001d !     1 ! 0x2d            ! min sample, channel 2, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x001e !     1 ! 0x00            ! min sample, channel 2, left, MSB   !
+! 0x001f !     1 ! 0x1f            !                                    !
+! 0x0020 !     1 ! 0x78            !                                    !
+! 0x0021 !     1 ! 0x32            ! min sample, channel 2, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x0022 !     1 ! 0x00            ! max sample, channel 0, right, MSB  !
+! 0x0023 !     1 ! 0x61            !                                    !
+! 0x0024 !     1 ! 0x2a            !                                    !
+! 0x0025 !     1 ! 0x1f            ! max sample, channel 0, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x0026 !     1 ! 0x00            ! max sample, channel 0, left, MSB   !
+! 0x0027 !     1 ! 0x5d            !                                    !
+! 0x0028 !     1 ! 0x43            !                                    !
+! 0x0029 !     1 ! 0x24            ! max sample, channel 0, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x002a !     1 ! 0x00            ! max sample, channel 1, right, MSB  !
+! 0x002b !     1 ! 0x00            !                                    !
+! 0x002c !     1 ! 0x25            !                                    !
+! 0x002d !     1 ! 0xcf            ! max sample, channel 1, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x002e !     1 ! 0x00            ! max sample, channel 1, left, MSB   !
+! 0x002f !     1 ! 0x17            !                                    !
+! 0x0030 !     1 ! 0x2a            !                                    !
+! 0x0031 !     1 ! 0x67            ! max sample, channel 1, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x0032 !     1 ! 0x00            ! max sample, channel 2, right, MSB  !
+! 0x0033 !     1 ! 0x00            !                                    !
+! 0x0034 !     1 ! 0x6b            !                                    !
+! 0x0035 !     1 ! 0x2d            ! max sample, channel 2, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x0036 !     1 ! 0x00            ! max sample, channel 2, left, MSB   !
+! 0x0037 !     1 ! 0x1f            !                                    !
+! 0x0038 !     1 ! 0x78            !                                    !
+! 0x0039 !     1 ! 0x32            ! max sample, channel 2, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x003a !     1 ! 0x00            ! avg sample, channel 0, right, MSB  !
+! 0x003b !     1 ! 0x20            !                                    !
+! 0x003c !     1 ! 0x1d            !                                    !
+! 0x003d !     1 ! 0x42            ! avg sample, channel 0, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x003e !     1 ! 0x00            ! avg sample, channel 0, left, MSB   !
+! 0x003f !     1 ! 0x17            !                                    !
+! 0x0040 !     1 ! 0x38            !                                    !
+! 0x0041 !     1 ! 0x4f            ! avg sample, channel 0, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x0042 !     1 ! 0x00            ! avg sample, channel 1, right, MSB  !
+! 0x0043 !     1 ! 0x1e            !                                    !
+! 0x0044 !     1 ! 0x25            !                                    !
+! 0x0045 !     1 ! 0xbf            ! avg sample, channel 1, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x0046 !     1 ! 0x00            ! avg sample, channel 1, left, MSB   !
+! 0x0047 !     1 ! 0x2a            !                                    !
+! 0x0048 !     1 ! 0x17            !                                    !
+! 0x0049 !     1 ! 0xec            ! avg sample, channel 1, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x004a !     1 ! 0x00            ! avg sample, channel 2, right, MSB  !
+! 0x004b !     1 ! 0x0f            !                                    !
+! 0x004c !     1 ! 0xda            !                                    !
+! 0x004d !     1 ! 0x27            ! avg sample, channel 2, right, LSB  !
+!--------+-------+-----------------+------------------------------------!
+! 0x004e !     1 ! 0x00            ! avg sample, channel 2, left, MSB   !
+! 0x004f !     1 ! 0x1f            !                                    !
+! 0x0050 !     1 ! 0x78            !                                    !
+! 0x0051 !     1 ! 0xf7            ! avg sample, channel 2, left, LSB   !
+!--------+-------+-----------------+------------------------------------!
+! 0x0052 !     1 ! 0x00            ! sample 0, channel 0, right, MSB    !
+! 0x0053 !     1 ! 0x61            !                                    !
+! 0x0054 !     1 ! 0x2a            !                                    !
+! 0x0055 !     1 ! 0x1f            ! sample 0, channel 0, right, LSB    !
+!--------+-------+-----------------+------------------------------------!
+! 0x0056 !     1 ! 0x00            ! sample 0, channel 0, left, MSB     !
+! 0x0057 !     1 ! 0x5d            !                                    !
+! 0x0058 !     1 ! 0x43            !                                    !
+! 0x0059 !     1 ! 0x24            ! sample 0, channel 0, left, LSB     !
+!--------+-------+-----------------+------------------------------------!
+! 0x005a !     1 ! 0x00            ! sample 0, channel 1, right, MSB    !
+! 0x005b !     1 ! 0x00            !                                    !
+! 0x005c !     1 ! 0x25            !                                    !
+! 0x005d !     1 ! 0xcf            ! sample 0, channel 1, right, LSB    !
+!--------+-------+-----------------+------------------------------------!
+! 0x005e !     1 ! 0x00            ! sample 0, channel 1, left, MSB     !
+! 0x005f !     1 ! 0x17            !                                    !
+! 0x0060 !     1 ! 0x2a            !                                    !
+! 0x0061 !     1 ! 0x67            ! sample 0, channel 1, left, LSB     !
+!--------+-------+-----------------+------------------------------------!
+! 0x0062 !     1 ! 0x00            ! sample 0, channel 2, right, MSB    !
+! 0x0063 !     1 ! 0x00            !                                    !
+! 0x0064 !     1 ! 0x6b            !                                    !
+! 0x0065 !     1 ! 0x2d            ! sample 0, channel 2, right, LSB    !
+!--------+-------+-----------------+------------------------------------!
+! 0x0066 !     1 ! 0x00            ! sample 0, channel 2, left, MSB     !
+! 0x0067 !     1 ! 0x1f            !                                    !
+! 0x0068 !     1 ! 0x78            !                                    !
+! 0x0069 !     1 ! 0x32            ! sample 0, channel 2, left, LSB     !
+!--------+-------+-----------------+------------------------------------!
+! 0x006a !     1 ! 0x25            ! sample 1, channel 0, right, MSB    !
+! 0x006b !     1 ! 0x10            !                                    !
+! 0x006c !     1 ! 0x34            !                                    !
+! 0x006d !     1 ! 0x18            ! sample 1, channel 0, right, LSB    !
+!--------+-------+-----------------+------------------------------------!
+! ...... !   ... ! ....            ! ...                                !
+!--------+-------+-----------------+------------------------------------!
+! ...... !   ... ! ....            ! ...                                !
+! 0x5e11 !     1 ! 0x35            ! sample 999, channel 2, left, LSB   !
+!--------!-------!-----------------+------------------------------------!
+!        !       !                 !                                    !

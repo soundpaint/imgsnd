@@ -1,0 +1,360 @@
+/*
+ * $Source: /home/reuter/archive/project/ImageSound/IS/src/doc/ImageSound.txt.rca $
+ * $Revision: 1.3 $
+ * $Aliases: beta2 $
+ * $Author: reuter $
+ * $Date: Tue Jul 21 23:57:34 1998 $
+ * $State: Experimental $
+ */
+
+/*
+ * @(#)ImageSound.txt 1.00 98/06/09
+ *
+ * Copyright (C) 1998 Juergen Reuter
+ *
+ * This file is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This file is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+ImageSound - basic concept and overall design
+=============================================
+
+This text file describes the basic concept and overall design of the
+ImageSound application.
+
+Introduction
+------------
+
+Synthesis of sound is quite common these days. Most modern
+synthesizers supply a pool of pre-defined samples (timbres), that
+usually can be manipulated by controlling a variety of parameters.
+Some parameters may, for example, control the envelope of the sample,
+while others may add a vibrato to the sample or filter it through
+a low-pass or a high-pass; some parameters may add reverb or chorus
+to the timbre. Note events are usually received by MIDI or an
+integrated keyboard.
+
+Algorithmic synthesis is also well-known; the perhaps most prominent
+example is the Csound system, that uses the so-called orchestra files
+to describe the synthesis of single note events, and the so-called
+score files to list note events.
+
+ImageSound uses a totally different approach. It converts pixelized
+image data into audio data. Just imagine some image. The x axis of the
+image represents the time axis of the resulting sound; the y axis
+represents the frequency axis. While the x axis is linear over time,
+the y axis is exponential over the frequency, or - in other words -
+linear over the pitch. Therefore, distances that are equal in the y axis
+result in equal tone intervals.
+
+Currently, the synthesis of ImageSound is sinoide, i.e. each pixel of
+the image results in a short sine wave; the amplitude depends on the
+brightness of the pixel. Hue and saturation (i.e. color) of the pixel
+is ignored. Future versions of ImageSound may use color to select
+specific wave forms (as a substitution for the sine wave that is
+solely used by now); the details of mapping colors onto sounds have
+not been decided by now. Mathematically seen, the mapping can be
+modelled as a function that maps a two-dimensional space (hue,
+saturation) into a space of indefinite dimension (series of fourier
+coefficients). Ideally, colors, that look similar, are mapped into
+sounds that sound similar. In other words, the function should
+preserve topology. Unfortunately, there is no bijective function from
+a two-dimensional space into a space of indefinite dimension that
+preserves topology. Note, however, that the human ear is restricted to
+a frequency band in the range of about 16Hz to 20kHz. Therefore, the
+fourier series needs not to be indefinite. Nevertheless, it seems to
+be difficult for me to define a sensible mapping.
+
+Future work
+-----------
+
+Maybe a future version of ImageSound will allow the user to specify a
+mapping of his or her own. A sound editing utility would then be used
+to edit sounds (wave forms) and map them onto colors. Such a sound
+edting utility might perhaps be based on a synthesis of a harmonic
+series of sinoide partials. See also the file BUGS in the parent
+directory for details on future work.
+
+However, this approach leads a problem: Say, e.g., a sine wave is
+colored green, and a square wave is colored red. Now we want to mix
+these two waves at the same time and at the same frequency. This means
+we want to put a green and a red pixel onto the same location in the
+image. We could combine these to pixels into one by just adding their
+color constituents (rgb values). This would result in a yellow pixel
+(red + green = yellow). For reason of the topological problems
+described above, this does not work in general (though it may work
+for a limited number of colors/waveforms). A solution of this problem
+may be a multi-layer approach as described in the file BUGS.
+
+File Formats
+------------
+
+ImageSound reads in a .pnm file and writes out a .sam file.
+
+The pnm file format (portable anymap file) is a collection of 6
+similar file formats for image data that are very common on unix
+platforms such as linux. It includes the file formats pbm (portable
+bitmap), pgm (portable graymap) and ppm (portable pixmap) in raw and
+ascii format. There are utilities such as the xv program or the xpaint
+program to convert image data such as .gif files into this format.
+
+ImageSound creates audio files in a proprietary format. The name of
+such a file usually ends with the suffix .sam. The file format is
+described in the file sam-format-description.txt, which should reside
+in the same directory as this file.
+
+To convert a .sam file into a .au or .wav file, use the Sam2Any
+utility, which is part of the ImageSound system.
+
+Usage of the utilities
+----------------------
+
+The ImageSound system is fully written in Java. It covers the three
+utilities ImageSound, Sam2Any and MIDI2PNM which are all in a package
+called "is".
+
+Provided that you have properly set up your environment (for details
+see the README file in the root directory of the ImageSound system),
+you can execute these utilities from the command line as usual,
+e.g. on Win95 or Unix:
+
+  java is.ImageSound -out example.sam example.pnm
+
+The command line options of the utilities are described below.
+
+Command-line options
+--------------------
+
+ImageSound:
+
+    Creates an audio file from an image data file.
+
+    Usage:
+
+        ImageSound [-nogreeting] [-help] [-version] 
+            [-copyright] [-rate <sample rate in Hz>]
+            [-length <sample length in seconds>]
+            [-minfreq <spectrum lower limit in Hz>]
+            [-maxfreq <spectrum upper limit in Hz>]
+            [-spctdist <spectral distance per pixel in cents>]
+	    [-tau <half-life of amplitude low-pass in seconds>]
+	    [-dynamics <max/min amplitude ratio in dB>]
+	    [-nopadding] [-info <any string>] [-noinfo]
+	    [-out file] inputfile
+
+    Options:
+
+        -nogreeting
+            Supresses the greeting message on start-up
+
+        -help
+            Prints a short usage info message.
+
+        -version
+            Prints a version identifier of the utility.
+
+        -copyright
+            Prints out a detailed copyright message.
+
+        -rate <sample rate in Hz>
+            Specifies the sample rate in Hertz to be used for the .sam file.
+            The default is 8000Hz.
+
+        -length <sample length in seconds>
+            Specifies the length of the sample in seconds.
+            The default is 10s.
+
+        -minfreq <spectrum lower limit in Hz>
+            Specifies the spectrum lower limit frequency in Hertz.
+            The bottom line of the image will be represented by this
+            frequency.
+            The default is 20Hz.
+
+        -maxfreq <spectrum upper limit in Hz>
+            Specifies the spectrum upper limit frequency in Hertz.
+            The top line of the image will be represented by this
+            frequency. This option is alternative to the following
+            option spctdist.
+            The default is 4000Hz.
+
+        -spctdist <spectral distance per pixel in cents>
+            Specifies the spectral distance in cents between two
+            adjacent lines of the image. This option is alternative to
+            the previous option maxfreq. If none of these two options
+            is specified, the default of option maxfreq will be used.
+
+        -tau <half-life of amplitude low-pass in seconds>]
+            Sets the tau constant. All amplitude data is low-pass
+            filtered over time individually for each spectral
+            line. The tau constant specifies the half-life period in
+            seconds of the low-pass. The default value is 0.02s.
+
+	-dynamics <max/min amplitude ratio in dB>]
+	    This constant is used to define the minimal output amplitude
+	    level that is taken into account. Sound with an amplitude
+	    below that level may be regarded as total silence for
+	    performance enhancement and for handling of padding (see
+	    below). The value applies for each frequency (thus
+	    neglecting that the audible limit depends on frequency).
+	    The default value is 20*16/ld(10)dB = 96.32959861dB, which
+	    is typical for 16 bit resolution of CD Audio quality. A
+	    low value may result in poor audio quality (and a shorter
+	    padding), but may enhance performance significantly.
+
+	-nopadding
+	    By default, ImageSound tries to avoid audible cracks at the
+	    end of the sound data. This is done by adding additional
+	    time beyond the last row or column of the image, until the
+	    sound has calmed down below the audible limit. This limit
+	    is computed from the dynamics option (see above). When
+	    specifying option nopadding, padding is turned off -
+	    possibly resulting in an audible crack.
+
+	-maxprecision
+	    By default, ImageSound tries to speed up computation by
+	    ignoring all amplitudes that run below the audible
+	    limit (see above). The limit is specified by the dynamics
+	    variable. When using this option, ImageSound will not
+	    ignore these amplitudes.
+
+        -info <any string>
+            Adds some comment to the resulting .sam file. If not
+            specified, a default comment is used.
+
+        -noinfo
+            Disables the default comment, that would be added to the
+            output file, if option info is not specified.
+
+        -out <file>
+            Specifies the name of the output file. The default is to
+            use the name of the input file, cut the suffix .pnm (or
+            .pbm or .pgm or .ppm), if available, and add the suffix
+            .sam.
+
+Sam2Any:
+
+    Converts a .sam file into a commonly used audio file format.
+
+    Usage:
+
+        Sam2Any [-nogreeting] [-help] [-version]
+            [-copyright] [-scale ( max | avg | <constant double> ) ]
+            [-type ( au | wav ) ] [-info <any string>] [-noinfo]
+            [-out file] inputfile
+
+    Options:
+
+        -nogreeting
+            Supresses the greeting message on start-up
+
+        -help
+            Prints a short usage info message.
+
+        -version
+            Prints a version identifier of the utility.
+
+        -copyright
+            Prints out a detailed copyright message.
+
+        -scale ( max | avg | <const scale>
+            Specifies how to scale the sample data during conversion.
+            max normalizes all sample data according to the maximum
+                absolute sample value.
+            avg normalizes all sample data according to the average
+                absolute sample value.
+            <const scale> normalizes all sample data by multiplying
+                the sample data with the specified double constant.
+            Default is max.
+        -type ( au | wav )
+            Specifies the type of the output file. Currently, only
+            .au and .wav file format are supported. Default is au.
+
+        -info <any string>
+            Adds some comment to the resulting .sam file. If not
+            specified, uses the comment of the input file.
+
+        -noinfo
+            Disables the comment, that would be added to the
+            output file, if option info is not specified.
+
+        -out <file>
+            Specifies the name of the output file. The default is to
+            use the name of the input file, cut the suffix .sam, if
+            available, and add the suffix .sam.
+
+MIDI2PNM:
+
+    Converts a MIDI file into proper .pnm file that represents the
+    contents of the MIDI file.
+
+    Usage:
+
+        MIDI2PNM [-nogreeting] [-help] [-version]
+            [-copyright] [-timescale <microseconds per pixel>]
+            [-pitchscale <pixels per semitone>]
+            [-pitchdecay <double>] [-pitchref <0..127>]
+            [-velocscale <factor>]
+            [-info <any string>] [-noinfo]
+            [-out file] inputfile
+
+    Options:
+
+        -nogreeting
+            Supresses the greeting message on start-up
+
+        -help
+            Prints a short usage info message.
+
+        -version
+            Prints a version identifier of the utility.
+
+        -copyright
+            Prints out a detailed copyright message.
+
+        -timescale <microseconds per pixel>
+            Sets the number of microseconds per image column.
+            The default is 62500 micrtoseconds per image column.
+
+        -pitchscale <pixels per semitone>
+            Sets the number of image rows between two adjacent notes.
+            The default is 1.0 image rows per semitone.
+
+        -pitchdecay <time in microseconds>
+            Sets the time of half-life period in microseconds for the
+            exponential decay of pitch across time. The default value
+            is 0.0 (no decay). A negative value of time results in an
+            exponential growth.
+
+        -pitchref <0..127>
+            When using option pitchdecay, this option allows to
+            specify the pitch to be reached at full decay. The value
+            is interpreted in terms of a MIDI note pitch. The default
+            value 0.
+
+        -velocscale <factor>
+            Specifies the velocity factor when converting MIDI
+            note on velocity values into pixel brightness.
+            The default value is 1.0, which should convert the MIDI
+            velocity range (0..127) into the full brightness range.
+
+        -info <any string>
+            Currently unused.
+
+        -noinfo
+            Currently unused.
+
+        -out <file>
+            Specifies the name of the output file. The default is to
+            use the name of the input file, cut the suffix .mid, if
+            available, and add the suffix .pnm.

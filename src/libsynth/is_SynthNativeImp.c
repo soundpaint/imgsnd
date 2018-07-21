@@ -1,0 +1,249 @@
+/*
+ * $Source: /home/reuter/archive/project/ImageSound/IS/src/libsynth/is_SynthNativeImp.c.rca $
+ * $Revision: 1.1 $
+ * $Aliases: beta2 $
+ * $Author: reuter $
+ * $Date: Sat Jun 27 14:45:05 1998 $
+ * $State: Experimental $
+ */
+
+/*
+ * @(#)Synth.java 1.00 98/02/22
+ *
+ * Copyright (C) 1998 Juergen Reuter
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+ */
+
+#include <math.h>
+#include <StubPreamble.h>
+#include "is_SynthNative.h"
+
+/* absolute sample values below this limit are regarded to be equal to 0.0 */
+#define EPSILON 1.0 / 2147483648.0
+
+int sampleCount = 0;
+double minSampleValue = + 1.0 / 0.0; /* +infty */
+double maxSampleValue = - 1.0 / 0.0; /* -infty */
+double avgSampleValue = 0.0;
+
+/*
+ * Class:     is_SynthNative
+ * Method:    getSampleCount
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_is_SynthNative_getSampleCount
+  (JNIEnv *env, jclass obj)
+{
+  return sampleCount;
+}
+
+/*
+ * Class:     is_SynthNative
+ * Method:    getMinSampleValue
+ * Signature: ()D
+ */
+JNIEXPORT jdouble JNICALL Java_is_SynthNative_getMinSampleValue
+  (JNIEnv *env, jclass obj)
+{
+  return minSampleValue;
+}
+
+/*
+ * Class:     is_SynthNative
+ * Method:    getMaxSampleValue
+ * Signature: ()D
+ */
+JNIEXPORT jdouble JNICALL Java_is_SynthNative_getMaxSampleValue
+  (JNIEnv *env, jclass obj)
+{
+  return maxSampleValue;
+}
+
+/*
+ * Class:     is_SynthNative
+ * Method:    getAvgSampleValue
+ * Signature: ()D
+ */
+JNIEXPORT jdouble JNICALL Java_is_SynthNative_getAvgSampleValue
+  (JNIEnv *env, jclass obj)
+{
+  return avgSampleValue;
+}
+
+double signum(double x)
+{
+  return (x < 0) ? -1.0 : (x > 0) ? +1.0 : 0.0;
+}
+
+
+/*
+ * Class:     is_SynthNative
+ * Method:    synth
+ * Signature: (IIIDDLis/Synth;Lis/PNMReader;Ljava/io/RandomAccessFile;)V
+ */
+JNIEXPORT void JNICALL
+Java_is_SynthNative_synth(JNIEnv *env, jclass obj,
+			  jint xsize, jint ysize,
+			  jint totalSamples,
+			  jdouble expScale, jdouble expGrowth,
+			  jobject synth, jobject reader, jobject out)
+{
+  int i, x, y;
+  double sample[totalSamples / ysize + 1];
+  double *first_sample_ptr = &sample[0];
+  double *last_sample_ptr, *sample_ptr;
+  double sample0, sample1 = 0.0, sample2 = 0.0;
+  double sampleDiff1to2 = 0.0, sampleDiff0to1 = 0.0;
+  double ampx, freqx, t;
+  double maxDistance, minDistance;
+  double freq[xsize];
+  double *first_freq_ptr = &freq[0];
+  double *freq_ptr;
+
+  jclass synth_cls;
+  jmethodID sleep;
+  jclass reader_cls;
+  jmethodID getGrayPixel;
+  jclass out_cls;
+  jmethodID writeDouble;
+
+  synth_cls = (*env)->GetObjectClass(env, synth);
+  sleep = (*env)->GetMethodID(env, synth_cls, "sleep", "()V");
+  if (sleep == 0)
+    {
+      fprintf(stdout, "FATAL ERROR: method not found: sleep\r\n");
+      fflush(stdout);
+      return;
+    }
+
+  reader_cls = (*env)->GetObjectClass(env, reader);
+  getGrayPixel = (*env)->GetMethodID(env, reader_cls, "getGrayPixel", "(II)D");
+  if (getGrayPixel == 0)
+    {
+      fprintf(stdout, "FATAL ERROR: method not found: getGrayPixel\r\n");
+      fflush(stdout);
+      return;
+    }
+
+  out_cls = (*env)->GetObjectClass(env, out);
+  writeDouble = (*env)->GetMethodID(env, out_cls, "writeDouble", "(D)V");
+  if (writeDouble == 0)
+    {
+      fprintf(stdout, "FATAL ERROR: method not found: writeDouble\r\n");
+      fflush(stdout);
+      return;
+    }
+
+  sampleCount = 0;
+  freq_ptr = first_freq_ptr;
+  for (i = 0; i < xsize; i++)
+    {
+      *freq_ptr = expScale * exp(i * expGrowth);
+      freq_ptr++;
+    }
+
+  for (y = 0; y < ysize; y++)
+    {
+      int n = (int)(((long)totalSamples) * (y + 1) / ysize) - sampleCount;
+      last_sample_ptr = first_sample_ptr + n;
+      for (sample_ptr = first_sample_ptr; sample_ptr < last_sample_ptr;
+	   sample_ptr++)
+	*sample_ptr = 0.0;
+      for (x = 0; x < xsize; x++)
+	{
+	  ampx = (*env)->CallDoubleMethod(env, reader, getGrayPixel, x, y);
+	  freqx = freq[x];
+	  t = freqx * sampleCount;
+	  for (sample_ptr = first_sample_ptr; sample_ptr < last_sample_ptr;
+	       sample_ptr++)
+	    {
+	      *sample_ptr += ampx * sin(t);
+	      t += freqx;
+
+	    }
+	  /*
+	   * Thread.sleep(1):
+	   *
+	   * jclass thread_cls;
+	   * jmethodID sleep;
+	   * thread_cls = (*env)->GetObjectClass(env, thread);
+	   * sleep = (*env)->GetStaticMethodID(env, thread_cls,
+	   *                                   "sleep", "(J)V");
+	   * if (sleep == 0)
+	   *   {
+	   *     fprintf(stdout, "FATAL ERROR: method not found: sleep\r\n");
+	   *     fflush(stdout);
+	   *     return;
+	   *   }
+	   *
+	   * (*env)->CallStaticVoidMethod(env, thread, sleep, 1);
+	   * OR: something like Java_java_lang_thread_sleep(env, obj, 1);
+	   * exc = (*env)->ExceptionOccurred(env);
+	   * if (exc)
+	   *   {
+	   *     (*env)->ExceptionDescribe(env);
+	   *     (*env)->ExceptionClear(env);
+	   *     fprintf(stdout,
+	   *             "WARNING: exception thrown by method sleep\r\n");
+	   *     fflush(stdout);
+	   *     return;
+	   *   }
+	   */
+	  (*env)->CallVoidMethod(env, synth, sleep);
+	}
+      for (sample_ptr = first_sample_ptr; sample_ptr < last_sample_ptr;
+	   sample_ptr++)
+	{
+	  /* sound enhnacement: take the last two samples into account */
+	  sample0 = sample1;
+	  sample1 = sample2;
+	  sample2 = *sample_ptr;
+	  sampleDiff0to1 = sampleDiff1to2;
+	  sampleDiff1to2 = sample2 - sample1;
+
+	  /* sound enhancement: avoid sudden signal fall in */
+	  maxDistance = 2 * fabs(sampleDiff0to1);
+	  if (fabs(sampleDiff1to2) > maxDistance)
+	    {
+	      if (fabs(maxDistance) < EPSILON)
+		sample2 = sample1 + EPSILON * signum(sampleDiff1to2);
+	      else
+		sample2 = sample1 + maxDistance * signum(sampleDiff1to2);
+	      sampleDiff1to2 = sample2 - sample1;
+	    }
+
+	  /* sound enhancement: avoid sudden signal fall off */
+	  minDistance = fabs(sampleDiff0to1) / 2;
+	  if (fabs(sampleDiff1to2) < minDistance)
+	    {
+	      sample2 = sample1 + minDistance * signum(sampleDiff1to2);
+	      sampleDiff1to2 = sample2 - sample1;
+	    }
+
+	  /* write out the enhanced sample */
+	  (*env)->CallVoidMethod(env, out, writeDouble, sample2);
+
+	  /* update min/max/average values */
+	  if (sample2 > maxSampleValue)
+	    maxSampleValue = sample2;
+	  if (sample2 < minSampleValue)
+	    minSampleValue = sample2;
+	  avgSampleValue += fabs(sample2);
+	}
+      sampleCount += n;
+    }
+  avgSampleValue /= totalSamples;
+}
