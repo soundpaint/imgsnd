@@ -43,6 +43,7 @@ collage.
           src="doc/examples/soundshapes/circle.gif" /></a>
   <br />
   [circle.mp3 (0'12'')](doc/examples/soundshapes/circle.mp3)
+  <br />
 
 2. **“Ball” (“Ball”)**<br />
   <a href="doc/examples/soundshapes/ball.gif">
@@ -50,6 +51,7 @@ collage.
           src="doc/examples/soundshapes/ball.gif" /></a>
   <br />
   [ball.mp3 (0'12'')](doc/examples/soundshapes/ball.mp3)
+  <br />
 
 3. **“Inverser Ball” (“Reverse Ball”)**<br />
   <a href="doc/examples/soundshapes/rev-ball.gif">
@@ -57,6 +59,7 @@ collage.
           src="doc/examples/soundshapes/rev-ball.gif" /></a>
   <br />
   [rev-ball.mp3 (0'12'')](doc/examples/soundshapes/rev-ball.mp3)
+  <br />
 
 4. **“Bouboule” (“Bouboule”)**<br />
   <a href="doc/examples/soundshapes/bouboule.gif">
@@ -64,6 +67,7 @@ collage.
           src="doc/examples/soundshapes/bouboule.gif" /></a>
   <br />
   [bouboule.mp3 (0'12'')](doc/examples/soundshapes/bouboule.mp3)
+  <br />
 
 5. **“Helix 1” (“Helix 1”)**<br />
   <a href="doc/examples/soundshapes/helix1.gif">
@@ -71,6 +75,7 @@ collage.
           src="doc/examples/soundshapes/helix1.gif" /></a>
   <br />
   [helix1.mp3 (0'12'')](doc/examples/soundshapes/helix1.mp3)
+  <br />
 
 6. **“Helix 2” (“Helix 2”)**<br />
   <a href="doc/examples/soundshapes/helix2.gif">
@@ -78,6 +83,7 @@ collage.
           src="doc/examples/soundshapes/helix2.gif" /></a>
   <br />
   [helix2.mp3 (0'12'')](doc/examples/soundshapes/helix2.mp3)
+  <br />
 
 7. **“Dreieck” (“Ramp”)**<br />
   <a href="doc/examples/soundshapes/ramp.gif">
@@ -85,6 +91,7 @@ collage.
           src="doc/examples/soundshapes/ramp.gif" /></a>
   <br />
   [ramp.mp3 (0'12'')](doc/examples/soundshapes/ramp.mp3)
+  <br />
 
 “1848/49”
 ---------
@@ -107,6 +114,7 @@ program.  The images serve quite well as an aural score.
           src="doc/examples/1848-49/Verdruss.gif" /></a>
   <br />
   [Verdruss.mp3 (0'25'')](doc/examples/1848-49/Verdruss.mp3)
+  <br />
 
 2. **“Diskussion” (“Discussion”)**<br />
   <a href="doc/examples/1848-49/Diskussion.gif">
@@ -114,6 +122,7 @@ program.  The images serve quite well as an aural score.
           src="doc/examples/1848-49/Diskussion.gif" /></a>
   <br />
   [Diskussion.mp3 (0'27'')](doc/examples/1848-49/Diskussion.mp3)
+  <br />
 
 3. **“Aufmarsch” (“Marching Up”)**<br />
   <a href="doc/examples/1848-49/Aufmarsch.gif">
@@ -121,6 +130,7 @@ program.  The images serve quite well as an aural score.
           src="doc/examples/1848-49/Aufmarsch.gif" /></a>
   <br />
   [Aufmarsch.mp3 (0'42'')](doc/examples/1848-49/Aufmarsch.mp3)
+  <br />
 
 4. **“Kampf” (“Fight”)**<br />
   <a href="doc/examples/1848-49/Kampf.gif">
@@ -128,6 +138,7 @@ program.  The images serve quite well as an aural score.
           src="doc/examples/1848-49/Kampf.gif" /></a>
   <br />
   [Kampf.mp3 (0'37'')](doc/examples/1848-49/Kampf.mp3)
+  <br />
 
 5. **“Niederlage” (“Defeat”)**<br />
   <a href="doc/examples/1848-49/Niederlage.gif">
@@ -135,6 +146,7 @@ program.  The images serve quite well as an aural score.
           src="doc/examples/1848-49/Niederlage.gif" /></a>
   <br />
   [Niederlage.mp3 (0'27'')](doc/examples/1848-49/Niederlage.mp3)
+  <br />
 
 6. **“Flucht” (“Escape”)**<br />
   <a href="doc/examples/1848-49/Flucht.gif">
@@ -142,6 +154,7 @@ program.  The images serve quite well as an aural score.
           src="doc/examples/1848-49/Flucht.gif" /></a>
   <br />
   [Flucht.mp3 (0'27'')](doc/examples/1848-49/Flucht.mp3)
+  <br />
 
 7. **“Reprise” (“Reprise”)**<br />
   <a href="doc/examples/1848-49/Reprise.gif">
@@ -149,3 +162,4 @@ program.  The images serve quite well as an aural score.
           src="doc/examples/1848-49/Reprise.gif" /></a>
   <br />
   [Reprise.mp3 (0'37'')](doc/examples/1848-49/Reprise.mp3)
+  <br />
